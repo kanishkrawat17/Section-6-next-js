@@ -1,33 +1,59 @@
+import fs from "fs/promises";
+import path from "path";
+import Link from "next/link";
+
 function HomePage(props) {
-  const { products, initData } = props;
-  console.log("homapeage", initData);
+  const { products } = props;
+
   return (
     <ul>
-      {products.map((product) => (
-        <li key={product.id}>{product.name}</li>
-      ))}
+      {products.map((product) => {
+        return (
+          <li key={product.id}>
+            <Link href={`/${product.id}`}>{product.title}</Link>
+          </li>
+        );
+      })}
     </ul>
   );
 }
-export async function getStaticProps() {
-  let initData = [];
 
-  const fetchData = async () => {
-    const response = await fetch("https://jsonplaceholder.typicode.com/todos/");
-    const data = await response.json();
-    initData = [...data];
-  };
-  
-  await fetchData();
+export async function getStaticProps() {
+  /*
+    let initData = [];
+
+    const fetchData = async () => {
+      const response = await fetch("https://dummyjson.com/products");
+      const json = await response.json();
+      initData = [...json?.products];
+    };
+
+    await fetchData();
+
+    if (!initData) {
+      // If by any chance data is null or undefined we pass redirect: ('/some-path') ,
+      //  that will redirect to that path
+      redirect("/no-data");
+    }
+
+    if (initData.length == 0) {
+      // If by any chance data do not come we pass notFound: true ,
+      //  that will show 404 page automatically
+      return { notFound: true };
+    }
+  */
+
+    // process -> is provided globally by node
+    // cwd -> current working directory
+  const pathName = path.join(process.cwd(), "dummy-data.json");
+  const stringifiedproducts = await fs.readFile(pathName);
+  const products = JSON.parse(stringifiedproducts)?.products;
 
   return {
     props: {
-      products: [
-        { id: 1, name: "Product 1" },
-        { id: 2, name: "Product 2" },
-      ],
-      initData,
+      products,
     },
   };
 }
+
 export default HomePage;
